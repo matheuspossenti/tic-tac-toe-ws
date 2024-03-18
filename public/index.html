@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jogo da Velha</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="board" class="board"></div>
+    <button id="reset-button">Resetar Jogo</button>
+
+    <script>
+      const ws = new WebSocket("ws://localhost:3000");
+
+      ws.onmessage = (event) => {
+        const gameData = JSON.parse(event.data);
+        updateBoard(gameData.board);
+      };
+
+      function updateBoard(board) {
+        const boardDiv = document.getElementById("board");
+        boardDiv.innerHTML = "";
+        board.forEach((cell, index) => {
+          const cellDiv = document.createElement("div");
+          cellDiv.textContent = cell;
+          cellDiv.classList.add("cell");
+          cellDiv.onclick = () => makeMove(index);
+          boardDiv.appendChild(cellDiv);
+        });
+      }
+
+      function makeMove(index) {
+        ws.send(JSON.stringify({ index }));
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const resetButton = document.getElementById("reset-button");
+        resetButton.addEventListener("click", function () {
+          console.log("Botão de reset clicado");
+          ws.send(JSON.stringify({ reset: true }));
+        });
+      });
+    </script>
+  </body>
+</html>
